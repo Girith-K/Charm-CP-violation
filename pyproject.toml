@@ -1,0 +1,29 @@
+# Makes src/charm_acp an installable, importable package (`pip install -e .`),
+# so notebooks do `from charm_acp import kinematics` instead of sys.path hacks,
+# and pytest can collect the tests cleanly. This is what the runbook means by
+# "reusable functions (importable, testable)".
+
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "charm-acp"
+version = "0.1.0"
+description = "Direct CP violation in charm decays (ΔA_CP) from LHCb open data"
+readme = "README.md"
+requires-python = ">=3.11"
+# Runtime deps are tracked in environment.yml / requirements.txt (the install
+# specs). Kept minimal here so `pip install -e .` does not fight the env solver.
+dependencies = []
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
