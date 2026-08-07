@@ -1,0 +1,55 @@
+# Pip fallback for charm-acp, for when you cannot / do not want to use conda.
+#
+# READ FIRST:
+#  * Create the venv with a Python 3.11 interpreter, NOT the system 3.13:
+#        py -3.11 -m venv .venv311
+#        .venv311\Scripts\activate      (PowerShell: .venv311\Scripts\Activate.ps1)
+#        python -m pip install -U pip
+#        pip install -r requirements.txt
+#        pip install -e .
+#    If you do not have a 3.11 interpreter, the conda path (environment.yml)
+#    is the path of least resistance and is recommended on Windows.
+#
+#  * These are FLOORS (the spec). After the first clean install, freeze the
+#    resolved versions into the reproducible lock:
+#        pip freeze > requirements.lock.txt
+#    and commit it. (Same discipline as the VQE project: pin what you validated.)
+
+# I/O
+uproot>=5.3
+awkward>=2.6
+
+# kinematics
+vector>=1.4
+
+# numerics
+numpy>=1.24
+scipy>=1.11
+
+# histogramming
+boost-histogram>=1.4
+hist>=2.7
+
+# fitting (PRIMARY backend)
+iminuit>=2.25
+
+# plotting
+matplotlib>=3.8
+mplhep>=0.3.50
+
+# PDG data
+particle>=0.24
+
+# convenience
+tqdm>=4.66
+pandas>=2.1
+
+# dev / tests
+pytest>=8.0
+jupyterlab>=4.0
+
+# ---------------------------------------------------------------------------
+# OPTIONAL: zfit, the higher-level fit backend (alternative to iminuit).
+# Commented out on purpose — it pulls TensorFlow and is the most fragile
+# dependency on Windows + newer Python. Install in a SEPARATE venv if needed:
+#   zfit>=0.20
