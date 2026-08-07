@@ -1,10 +1,8 @@
-"""Raw asymmetries and the ΔA_CP combination.
+"""Raw asymmetries, ΔA_CP, blinding, and (pT, η) binning.
 
     A_raw(f) = [N(D0→f) - N(D̄0→f)] / [N(D0→f) + N(D̄0→f)]
     ΔA_CP    = A_raw(KK) - A_raw(ππ) ≈ A_CP(KK) - A_CP(ππ)
-
-Yields come from fits, so errors are propagated from the fit yield
-uncertainties rather than raw √N. For high-purity samples the two nearly agree.
+Errors propagate from the fit yields, not raw √N.
 """
 
 from __future__ import annotations
@@ -13,11 +11,7 @@ import numpy as np
 
 
 def raw_asymmetry(n_d0, n_d0bar, s_d0, s_d0bar):
-    """Raw asymmetry A and its error, propagated from fit yield errors.
-
-    ∂A/∂N(D0)   =  2 N(D̄0) / N^2
-    ∂A/∂N(D̄0)  = -2 N(D0)  / N^2,   N = N(D0) + N(D̄0)
-    """
+    """Raw asymmetry and its error, propagated from the fit yield errors."""
     N = n_d0 + n_d0bar
     A = (n_d0 - n_d0bar) / N
     dA_dn = 2 * n_d0bar / N**2
@@ -27,8 +21,6 @@ def raw_asymmetry(n_d0, n_d0bar, s_d0, s_d0bar):
 
 
 def raw_asymmetry_counting(n_d0, n_d0bar):
-    """Counting-formula error σ_A = sqrt((1 - A²)/N), a sanity check only.
-    """
     N = n_d0 + n_d0bar
     A = (n_d0 - n_d0bar) / N
     sigma_A = np.sqrt((1 - A * A) / N)
@@ -36,12 +28,13 @@ def raw_asymmetry_counting(n_d0, n_d0bar):
 
 
 def delta_acp(A_kk, s_kk, A_pp, s_pp):
-    """ΔA_CP = A_raw(KK) - A_raw(ππ), independent samples so errors add in
-    quadrature."""
     return A_kk - A_pp, np.hypot(s_kk, s_pp)
 
-#blinding
+
 def blind_offset(passphrase=None, scale=None):
+    """Deterministic hidden offset for blinding.
+    Reproducible across runs, and nobody computes it by hand before the end.
+    """
     import hashlib
 
     from . import config
@@ -54,6 +47,7 @@ def blind_offset(passphrase=None, scale=None):
 
 
 def blind_delta_acp(delta, sigma):
+    """Blinded ΔA_CP. The error is untouched so it can be worked on blind."""
     return delta + blind_offset(), sigma
 
 
@@ -62,17 +56,13 @@ def unblind(blinded_value):
 
 
 def weighted_average(values, errors):
-    """Inverse-variance weighted average and its error.
-
-    Phase 8 uses it to combine per-(pT, η)-bin asymmetries into one corrected
-    A_raw, insensitive to the kinematic mismatch between KK and ππ.
-    """
     values = np.asarray(values, dtype=float)
     errors = np.asarray(errors, dtype=float)
     w = 1.0 / errors**2
     avg = np.sum(w * values) / np.sum(w)
     err = np.sqrt(1.0 / np.sum(w))
     return avg, err
+
 
 def bin_index_2d(x, y, x_edges, y_edges):
     x, y = np.asarray(x), np.asarray(y)
