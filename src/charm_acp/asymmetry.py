@@ -28,9 +28,6 @@ def raw_asymmetry(n_d0, n_d0bar, s_d0, s_d0bar):
 
 def raw_asymmetry_counting(n_d0, n_d0bar):
     """Counting-formula error σ_A = sqrt((1 - A²)/N), a sanity check only.
-
-    Reduces to 1/√N for small A. Compare against the fit-propagated error from
-    `raw_asymmetry`, do not use it in place of that.
     """
     N = n_d0 + n_d0bar
     A = (n_d0 - n_d0bar) / N
@@ -43,15 +40,8 @@ def delta_acp(A_kk, s_kk, A_pp, s_pp):
     quadrature."""
     return A_kk - A_pp, np.hypot(s_kk, s_pp)
 
-
+#blinding
 def blind_offset(passphrase=None, scale=None):
-    """Deterministic hidden offset for blinding ΔA_CP.
-
-    Hashing the passphrase makes the offset perfectly reproducible, every rerun
-    applies the same unknown shift, and it is not knowable without deliberately
-    computing it. Discipline is the protection rather than secrecy, we simply
-    never call this by hand until Phase 10.
-    """
     import hashlib
 
     from . import config
@@ -64,17 +54,10 @@ def blind_offset(passphrase=None, scale=None):
 
 
 def blind_delta_acp(delta, sigma):
-    """Blinded ΔA_CP, physics plus a hidden offset.
-
-    The error is untouched, an additive offset cannot change it, so the full
-    error analysis can be developed while blind.
-    """
     return delta + blind_offset(), sigma
 
 
 def unblind(blinded_value):
-    """Remove the offset. Call exactly once, in Phase 10, after cuts, fit model
-    and systematics are all frozen."""
     return blinded_value - blind_offset()
 
 
@@ -90,11 +73,8 @@ def weighted_average(values, errors):
     avg = np.sum(w * values) / np.sum(w)
     err = np.sqrt(1.0 / np.sum(w))
     return avg, err
-def bin_index_2d(x, y, x_edges, y_edges):
-    """Flat bin index for each (x, y) pair, -1 if outside the grid.
 
-    Indexed row-major as ix*ny + iy.
-    """
+def bin_index_2d(x, y, x_edges, y_edges):
     x, y = np.asarray(x), np.asarray(y)
     nx, ny = len(x_edges) - 1, len(y_edges) - 1
     ix = np.digitize(x, x_edges) - 1
