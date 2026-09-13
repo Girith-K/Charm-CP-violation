@@ -1,7 +1,7 @@
+# exact versions the results were made with, run pip install -e . after creating it
 name: charm-acp
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - _openmp_mutex=4.5
   - anyio=4.14.1
@@ -236,5 +236,4 @@ dependencies:
   - zlib-ng=2.3.3
   - zstd=1.5.7
   - pip:
-      - charm-acp==0.1.0
       - scipy==1.17.1

@@ -1,0 +1,52 @@
+# runs the tests, once with requirements.txt and once with the lock file
+name: tests
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+
+jobs:
+  spec:
+    name: spec (requirements.txt) / ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+      - name: Install the declared dependencies
+        run: |
+          python -m pip install -U pip
+          pip install -r requirements.txt
+          pip install -e .
+      - name: Record the resolved environment
+        run: pip freeze
+      - name: Test
+        run: python -m pytest -q
+
+  lock:
+    name: lock (environment.lock.yml) / windows-latest
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          environment-file: environment.lock.yml
+          activate-environment: charm-acp
+          miniforge-version: latest
+          auto-activate-base: false
+      - name: Install the package into the locked env
+        run: pip install -e . --no-deps
+      - name: Show what was actually installed
+        run: conda list
+      - name: Test
+        run: python -m pytest -q

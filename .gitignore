@@ -1,8 +1,13 @@
-# --- data: never commit the ntuples (tens of GB; provenance lives in text) ---
-data/
+# data, never commit the ntuples or the passphrase
+data/*
 *.root
+data/.blind_passphrase
+data/quarantine-v2-blinding/
 
-# --- python ---
+# results, run_all.py makes these
+results/
+
+# python
 __pycache__/
 *.py[cod]
 .ipynb_checkpoints/
@@ -13,25 +18,23 @@ dist/
 .pytest_cache/
 .ruff_cache/
 
-# --- os / editor ---
+# editors
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
 
-# --- scratch ---
+# scratch
 *.lock.yml.bak
 *.tmp
 
-# Keep the empty data dir tracked
+# keep the empty data folder
 !data/.gitkeep
 
-# NOT ignored, deliberately:
-#   plots/*.png        -> REPORT.md embeds these; without them the paper
-#                         renders with broken images on GitHub (~2 MB total)
-#   results/*.json     -> machine-readable outputs of every pipeline stage;
-#                         small, and they make the numbers in the report
-#                         checkable without rerunning 8 GB of ntuples
-#   results/*.log|txt  -> the run_all transcript, ~20 KB, useful provenance
-#   report/provenance/ -> the request YAMLs: what was asked of CERN, exactly
-#   report/*.docx      -> the paper deliverable (hand-edited, not generated)
+# local notes
+PUSH_CHECKLIST.md
+
+# old report docx files, can leak the blinding
+report/*.docx
+
+# plots are committed on purpose, they come from the last full run

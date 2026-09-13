@@ -1,6 +1,4 @@
-# Primary, recommended environment for the project
-
-
+# conda environment
 name: charm-acp
 channels:
   - conda-forge
