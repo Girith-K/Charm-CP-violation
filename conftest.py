@@ -1,6 +1,4 @@
-"""Put src/ on sys.path so tests run before `pip install -e .` is done.
-Once you install the package editable, this is harmless/redundant.
-"""
+# adds src to the path so the tests find the package without installing it
 
 import sys
 from pathlib import Path
