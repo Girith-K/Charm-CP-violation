@@ -1,9 +1,7 @@
-# End to end dACP rehearsal on the v2 test production
+# first full dACP run on the v2 test file
 
 import os
 
-# v2 only notebook, so pin the production before charm_acp is imported: the
-# blinding salt and offset scale must be v2's, not the v3 default in config
 os.environ["CHARM_ACP_PRODUCTION"] = "v2"
 
 import matplotlib
@@ -74,7 +72,6 @@ if kpi["D0"] and kpi["D0bar"]:
     A, sA = asy.raw_asymmetry(kpi["D0"].n_sig, kpi["D0bar"].n_sig,
                               kpi["D0"].n_sig_err, kpi["D0bar"].n_sig_err)
     print(f"  A_raw(KPi control) = {A:+.4f} +- {sA:.4f}")
-    print("  (null test: pure nuisance level; consistent with ~0-1% expected)")
 
 have_signal = fit_out["KK"]["D0"] and fit_out["KK"]["D0bar"] \
     and fit_out["PiPi"]["D0"] and fit_out["PiPi"]["D0bar"]
@@ -86,7 +83,7 @@ if have_signal:
                                  pp["D0"].n_sig_err, pp["D0bar"].n_sig_err)
     d, sd = asy.delta_acp(Akk, skk, App, spp)
     bd, bsd = asy.blind_delta_acp(d, sd)
-    print(f"  BLINDED dACP = {bd:+.4f} +- {bsd:.4f}   <-- offset stays until Phase 10")
+    print(f"  BLINDED dACP = {bd:+.4f} +- {bsd:.4f}   (offset stays until 17_unblind.py)")
 else:
     print("  dACP: waiting on full production for KK/PiPi statistics "
           "(machinery in place: asy.blind_delta_acp).")

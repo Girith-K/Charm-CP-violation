@@ -1,4 +1,4 @@
-# Validate the (pT, eta) correction on synthetic data with a known injected bias
+# checks the pT eta binning correction on fake data with a known bias
 
 import matplotlib
 

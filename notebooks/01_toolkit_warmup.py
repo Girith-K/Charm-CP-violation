@@ -1,4 +1,4 @@
-# Warm up on LHCb open data, fit the D0 mass peak with an extended ML fit
+# warm up, fits the D0 mass peak on the masterclass data
 
 import matplotlib
 
@@ -10,12 +10,10 @@ import numpy as np
 import uproot
 from iminuit import Minuit
 from iminuit.cost import ExtendedBinnedNLL
-from particle import Particle
 from scipy.stats import norm
 
 from charm_acp.config import DATA_DIR, PLOTS_DIR
-
-M_D0_PDG = Particle.from_pdgid(421).mass
+from charm_acp.kinematics import M_D0
 
 tree = uproot.open(DATA_DIR / "archive" / "MasterclassData.root")["DecayTree"]
 arr = tree.arrays(["D0_MM", "D0_TAU", "D0_PT", "D0_MINIPCHI2"], library="np")
@@ -50,7 +48,7 @@ assert m.valid, "fit did not converge, inspect m.fmin"
 n_sig, n_sig_err = m.values["n_sig"], m.errors["n_sig"]
 mu_fit, sigma_fit = m.values["mu"], m.values["sigma"]
 print(f"fit valid: N_sig = {n_sig:.0f} +- {n_sig_err:.0f}")
-print(f"           mu    = {mu_fit:.2f} MeV   (PDG D0: {M_D0_PDG:.2f} MeV)")
+print(f"           mu    = {mu_fit:.2f} MeV   (PDG D0: {M_D0:.2f} MeV)")
 print(f"           sigma = {sigma_fit:.2f} MeV  (detector resolution)")
 
 plt.style.use(mplhep.style.LHCb2)

@@ -1,4 +1,4 @@
-# Warm up on a published CP asymmetry, A_raw(KKK) from the B2HHH open data
+# warm up, raw charge asymmetry in B to KKK from the B2HHH open data
 
 import matplotlib
 
@@ -10,15 +10,11 @@ import numpy as np
 import uproot
 from iminuit import Minuit
 from iminuit.cost import ExtendedBinnedNLL
-from particle import Particle
 from scipy.stats import norm
 
 from charm_acp import kinematics as kin
 from charm_acp.asymmetry import raw_asymmetry
 from charm_acp.config import DATA_DIR, PLOTS_DIR
-
-M_K = Particle.from_pdgid(321).mass
-M_B_PDG = Particle.from_pdgid(521).mass
 
 PROB_K_MIN = 0.70
 PROB_PI_MAX = 0.50
@@ -53,7 +49,7 @@ for name, mk in masks:
 p4 = []
 for i in (1, 2, 3):
     px, py, pz = a[f"H{i}_PX"][sel], a[f"H{i}_PY"][sel], a[f"H{i}_PZ"][sel]
-    p4.append((px, py, pz, kin.energy(px, py, pz, M_K)))
+    p4.append((px, py, pz, kin.energy(px, py, pz, kin.M_K)))
 m_kkk = kin.mass_from_four_momentum(*kin.sum_four_momentum(p4))
 print(f"m(KKK): mean {m_kkk.mean():.0f} MeV, "
       f"in-window fraction {((m_kkk > FIT_LO) & (m_kkk < FIT_HI)).mean():.2%}")
@@ -98,10 +94,7 @@ nM, sM = res[-1][0], res[-1][1]
 nP, sP = res[+1][0], res[+1][1]
 A, sigA = raw_asymmetry(nM, nP, sM, sP)
 print(f"\nA_raw(KKK) = {A:+.4f} +- {sigA:.4f}   (stat only)")
-print("published LHCb A_CP(B±->K+K-K±) ≈ -0.036 ± 0.004; raw value also")
-print("contains the B± production asymmetry -> agreement only expected at the")
-print("percent level. Removing such nuisances is exactly why the charm")
-print("measurement is built as a DIFFERENCE (ΔA_CP).")
+print("published LHCb A_CP(B->KKK) = -0.036 +- 0.004")
 
 plt.style.use(mplhep.style.LHCb2)
 fig, axes = plt.subplots(
