@@ -1,4 +1,4 @@
-# Invariant mass, Delta m and four vector helpers
+# masses, dm, pT and eta
 
 from __future__ import annotations
 
@@ -7,7 +7,7 @@ import numpy as np
 M_PI = 139.570
 M_K = 493.677
 M_D0 = 1864.84
-DM_DSTAR = 145.43
+DM_DSTAR = 145.4258
 
 
 def energy(px, py, pz, mass):

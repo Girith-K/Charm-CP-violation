@@ -1,4 +1,4 @@
-# Offline selection cuts, cutflow, flavour tagging, tree layouts and dedup
+# cuts, cutflow, flavour tag, tree names and one candidate per event
 
 from __future__ import annotations
 from dataclasses import dataclass
@@ -6,6 +6,7 @@ import numpy as np
 import uproot
 
 from .config import SEED
+from .kinematics import M_D0
 
 PARTS = {
     "KK": {"h1": "Kplus", "h2": "Kminus", "soft": "piplus"},
@@ -67,14 +68,19 @@ def iter_mode(path, mode, layout, step_size="512 MB"):
             yield _normalize(arr, d0)
 
 
-def single_candidate_pick(run, evt, vchi2, seed=SEED):
+def single_candidate_pick(run, evt, vchi2, seed=SEED, by="vchi2"):
+    if by not in ("vchi2", "random"):
+        raise ValueError(f"unknown candidate rule {by!r}, use vchi2 or random")
     rng = np.random.default_rng(seed)
     evt = np.asarray(evt).astype(np.int64)
     if evt.size and int(evt.max()) >= 10**10:
-        raise ValueError("eventNumber >= 1e10 would collide the dedup key, "
-                         "switch to a (run, evt) pair key")
+        raise ValueError("eventNumber >= 1e10, dedup key would collide")
     key = (np.asarray(run).astype(np.int64) * np.int64(10**10) + evt)
-    order = np.lexsort((rng.random(len(key)), np.asarray(vchi2), key))
+    draw = rng.random(len(key))
+    if by == "random":
+        order = np.lexsort((draw, key))
+    else:
+        order = np.lexsort((draw, np.asarray(vchi2), key))
     first = np.ones(len(order), dtype=bool)
     first[1:] = key[order][1:] != key[order][:-1]
     pick = np.zeros(len(order), dtype=bool)
@@ -93,6 +99,9 @@ class Cuts:
     d0_tau_min: float = 0.0
     soft_pt_min: float = 200.0
     soft_fiducial: bool = False
+    fid_pz_min: float = 4.0
+    fid_pz_mid: float = 6.0
+    fid_px_max: float = 1.0
     probnn_k_min: float | None = None
     probnn_pi_min: float | None = None
 
@@ -100,8 +109,6 @@ class Cuts:
 DEFAULT_CUTS = Cuts()
 NOMINAL_CUTS = Cuts(pid_k_min=0.0, soft_pid=False, d0_ipchi2_max=9.0,
                     soft_fiducial=True)
-
-M_D0_PDG = 1864.84
 
 
 def pid_mask(arr, mode, cuts=DEFAULT_CUTS):
@@ -129,7 +136,7 @@ def quality_mask(arr, mode, cuts=DEFAULT_CUTS):
 
 
 def d0_mass_mask(arr, mode, cuts=DEFAULT_CUTS):
-    return np.abs(arr["D0_MM"] - M_D0_PDG) < cuts.d0_mass_win
+    return np.abs(arr["D0_MM"] - M_D0) < cuts.d0_mass_win
 
 
 def prompt_mask(arr, mode, cuts=DEFAULT_CUTS):
@@ -146,7 +153,8 @@ def soft_fiducial_mask(arr, mode, cuts=DEFAULT_CUTS):
         return np.ones(len(arr["D0_MM"]), dtype=bool)
     px = arr[f"{PARTS[mode]['soft']}_PX"] / 1000.0
     pz = arr[f"{PARTS[mode]['soft']}_PZ"] / 1000.0
-    edge = (pz < 4.0) | ((pz < 6.0) & (np.abs(px) > 1.0))
+    edge = ((pz < cuts.fid_pz_min)
+            | ((pz < cuts.fid_pz_mid) & (np.abs(px) > cuts.fid_px_max)))
     return ~edge
 
 

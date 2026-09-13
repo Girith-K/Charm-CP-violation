@@ -1,6 +1,7 @@
-# charm_acp, direct CP violation in charm from LHCb open data
+# charm CP violation analysis on LHCb open data
 
-from . import asymmetry, fitting, kinematics, selection
+from . import asymmetry, fitting, gates, kinematics, selection
 
-__all__ = ["kinematics", "selection", "fitting", "asymmetry"]
-__version__ = "0.1.0"
+__all__ = ["kinematics", "selection", "fitting", "asymmetry", "gates"]
+
+__version__ = "3.2.0"

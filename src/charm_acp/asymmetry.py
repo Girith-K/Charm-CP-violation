@@ -1,16 +1,23 @@
-# Raw asymmetries, Delta A_CP, blinding and (pT, eta) binning
+# raw asymmetries, dACP, blinding and binning in pT and eta
 
 from __future__ import annotations
 
+import hashlib
+
 import numpy as np
 
+from . import config
 
-def raw_asymmetry(n_d0, n_d0bar, s_d0, s_d0bar):
+
+def raw_asymmetry(n_d0, n_d0bar, s_d0, s_d0bar, cov=0.0):
     N = n_d0 + n_d0bar
     A = (n_d0 - n_d0bar) / N
     dA_dn = 2 * n_d0bar / N**2
     dA_dnb = -2 * n_d0 / N**2
-    sigma_A = np.hypot(dA_dn * s_d0, dA_dnb * s_d0bar)
+    var = ((dA_dn * s_d0) ** 2
+           + (dA_dnb * s_d0bar) ** 2
+           + 2.0 * dA_dn * dA_dnb * np.asarray(cov, dtype=float))
+    sigma_A = np.sqrt(np.clip(var, 0.0, None))
     return A, sigma_A
 
 
@@ -26,15 +33,10 @@ def delta_acp(A_kk, s_kk, A_pp, s_pp):
 
 
 def polarity_average(a1, s1, a2, s2):
-    # equal weights by construction, cancels polarity-odd detection asymmetry
     return 0.5 * (a1 + a2), 0.5 * float(np.hypot(s1, s2))
 
 
 def blind_offset(salt="", passphrase=None, scale=None):
-    import hashlib
-
-    from . import config
-
     passphrase = passphrase or config.blind_passphrase()
     scale = scale if scale is not None else config.blind_scale()
     msg = passphrase if not salt else f"{passphrase}|{salt}"
@@ -44,8 +46,6 @@ def blind_offset(salt="", passphrase=None, scale=None):
 
 
 def _production_salt(mode=None):
-    from . import config
-
     return config.PRODUCTION if mode is None else f"{config.PRODUCTION}|{mode}"
 
 
@@ -78,7 +78,6 @@ def bin_index_2d(x, y, x_edges, y_edges):
     nx, ny = len(x_edges) - 1, len(y_edges) - 1
     ix = np.digitize(x, x_edges) - 1
     iy = np.digitize(y, y_edges) - 1
-    # keep entries sitting exactly on the top edge, matching np.histogram
     ix = np.where(x == x_edges[-1], nx - 1, ix)
     iy = np.where(y == y_edges[-1], ny - 1, iy)
     valid = (ix >= 0) & (ix < nx) & (iy >= 0) & (iy < ny)
@@ -98,3 +97,16 @@ def binned_delta_acp(n_d0_kk, n_d0bar_kk, s_d0_kk, s_d0bar_kk,
     if not np.any(good):
         return np.nan, np.nan
     return weighted_average(d_bins[good], s_bins[good])
+
+
+def barlow_sigma(stat_nominal, stat_variation):
+    a = float(stat_nominal) ** 2
+    b = float(stat_variation) ** 2
+    return float(np.sqrt(abs(b - a)))
+
+
+def barlow_significance(shift, stat_nominal, stat_variation):
+    sig = barlow_sigma(stat_nominal, stat_variation)
+    if sig <= 0:
+        return None
+    return abs(float(shift)) / sig
