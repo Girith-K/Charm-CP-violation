@@ -1,0 +1,30 @@
+defaults:
+  application: DaVinci/v46r11
+  wg: OpenData
+  inform: []
+  automatically_configure: true
+  output: DVNtuple.root
+job0:
+  input:
+    bk_query: >-
+      /LHCb/Collision16/Beam6500GeV-VeloClosed-MagDown/Real
+      Data/Reco16/Stripping28r2/90000000/CHARM.MDST
+  options:
+    - DstpD02KK.py
+    - DstpD02PiPi.py
+    - DstmD02KK.py
+    - DstmD02PiPi.py
+    - DstD02KPi.py
+  root_in_tes: /Event/Charm
+job1:
+  input:
+    bk_query: >-
+      /LHCb/Collision16/Beam6500GeV-VeloClosed-MagUp/Real
+      Data/Reco16/Stripping28r2/90000000/CHARM.MDST
+  options:
+    - DstpD02KK.py
+    - DstpD02PiPi.py
+    - DstmD02KK.py
+    - DstmD02PiPi.py
+    - DstD02KPi.py
+  root_in_tes: /Event/Charm

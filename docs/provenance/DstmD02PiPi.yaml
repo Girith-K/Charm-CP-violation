@@ -1,0 +1,102 @@
+inputs:
+  - /Event/Charm/Phys/DstarCPForPromptCharm/Particles
+descriptorTemplate: >-
+  ${Dst_2010_plus}[D*(2010)+ -> ${D_0}(D~0 -> ${piplus}pi+ ${piminus}pi-)
+  ${piplus_0}pi+]CC
+tools:
+  - TupleToolKinematic:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+      Transporter: ParticleTransporter:PUBLIC
+  - TupleToolPid:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+  - TupleToolANNPID:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+      ANNPIDTunes:
+        - MC12TuneV2
+        - MC12TuneV3
+        - MC12TuneV4
+        - MC15TuneV1
+      PIDTypes:
+        - Electron
+        - Muon
+        - Pion
+        - Kaon
+        - Proton
+        - Ghost
+  - TupleToolGeometry:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+      RefitPVs: false
+      PVReFitter: LoKi::PVReFitter:PUBLIC
+      FillMultiPV: false
+  - TupleToolEventInfo:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+  - TupleToolPrimaries:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+      InputLocation: Rec/Vertex/Primary
+  - TupleToolPropertime:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+      FitToPV: false
+  - TupleToolTISTOS:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+      VerboseL0: false
+      VerboseHlt1: false
+      VerboseHlt2: false
+      VerboseStripping: false
+      FillL0: true
+      FillHlt1: true
+      FillHlt2: true
+      FillStripping: false
+      TriggerList: []
+      Hlt1TriggerTisTosName: Hlt1TriggerTisTos
+      Hlt2TriggerTisTosName: Hlt2TriggerTisTos
+      L0TriggerTisTosName: L0TriggerTisTos
+      PIDList: []
+      TopParticleOnly: false
+      Hlt1Phys: >-
+        Hlt1(?!ODIN)(?!L0)(?!Lumi)(?!Tell1)(?!MB)(?!NZS)(?!Velo)(?!BeamGas)(?!Incident).*Decision
+      Hlt2Phys: >-
+        Hlt2(?!Forward)(?!DebugEvent)(?!Express)(?!Lumi)(?!Transparent)(?!PassThrough).*Decision
+      TIS: true
+      TOS: true
+      TUS: false
+      TPS: false
+  - TupleToolTrackInfo:
+      ExtraName: ''
+      Verbose: false
+      MaxPV: 100
+      StoredMeasurements: []
+      ExtrapolatorName: TrackMasterExtrapolator:PUBLIC
+branches:
+  Dst_2010_plus:
+    particle: D*(2010)+
+    tools: []
+  D_0:
+    particle: D~0
+    tools: []
+  piplus:
+    particle: pi+
+    tools: []
+  piminus:
+    particle: pi-
+    tools: []
+  piplus_0:
+    particle: pi+
+    tools: []
+groups: {}
+name: DecayTreeTuple/DstmD02PiPi
